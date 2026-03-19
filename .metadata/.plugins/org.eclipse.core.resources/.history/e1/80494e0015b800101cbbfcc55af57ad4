@@ -1,0 +1,22 @@
+package com.recipeapp.service;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import java.util.List;
+import com.recipeapp.entity.*;
+import com.recipeapp.repository.*;
+
+@Service
+public class CommentService {
+
+    @Autowired
+    private CommentRepository commentRepo;
+
+    public Comment addComment(Comment comment) {
+        return commentRepo.save(comment);
+    }
+
+    public List<Comment> getCommentsByRecipe(Long recipeId) {
+        return commentRepo.findByRecipeId(recipeId);
+    }
+}

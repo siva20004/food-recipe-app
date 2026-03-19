@@ -1,0 +1,219 @@
+.recipe-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  padding: 20px;
+  margin: 15px auto;
+  max-width: 500px;
+  transition: transform 0.3s;
+}
+
+.recipe-card:hover {
+  transform: translateY(-5px);
+}
+
+.recipe-title {
+  color: #185a9d;
+  margin-bottom: 10px;
+  font-size: 20px;
+}
+
+.recipe-description {
+  color: #555;
+  margin-bottom: 15px;
+  line-height: 1.5;
+}
+
+.recipe-actions-main {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.recipe-actions-main button {
+  flex: 1;
+  min-width: 100px;
+  padding: 10px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.3s;
+}
+
+.recipe-buttons {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.btn-download {
+  background-color: #2196F3;
+  color: white;
+}
+.btn-download:hover {
+  background-color: #0d6efd;
+}
+
+.btn-save {
+  background-color: #f2f2f2;
+  color: #333;
+}
+.btn-save.saved {
+  background-color: #ff4d4d;
+  color: white;
+}
+.btn-save:hover {
+  background-color: #e0e0e0;
+}
+
+.btn-view {
+  background-color: #4CAF50;
+  color: white;
+}
+.btn-view:hover {
+  background-color: #3e8e41;
+}
+
+/* Modal Popup */
+.recipe-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999; /* increase this value */
+  animation: fadeIn 0.3s ease;
+}
+
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.recipe-modal-content {
+  background: white;
+  border-radius: 12px;
+  padding: 25px;
+  width: 90%;
+  max-width: 600px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+  overflow-y: auto;
+  max-height: 90vh;
+  position: relative;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(30px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.close-modal {
+  position: absolute;
+  top: 12px;
+  right: 15px;
+  background: #ff4d4d;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.chef-info {
+  color: #555;
+  margin: 10px 0;
+}
+
+.steps-section {
+  background-color: #f9f9f9;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  margin: 20px 0;
+}
+
+.steps-text {
+  color: #444;
+  white-space: pre-wrap;
+  line-height: 1.7;
+  margin-top: 8px;
+}
+
+.recipe-stats {
+  display: flex;
+  justify-content: space-between;
+  margin: 15px 0;
+  padding: 10px;
+  background: #fafafa;
+  border-radius: 6px;
+  border: 1px solid #eee;
+  color: #666;
+  font-size: 14px;
+}
+
+/* Comments inside modal */
+.comment-section {
+  margin-top: 20px;
+  border-top: 1px solid #eee;
+  padding-top: 10px;
+}
+
+.comment-section h4 {
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.comment-input-wrapper {
+  display: flex;
+  gap: 10px;
+}
+
+.comment-input-wrapper input {
+  flex: 1;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+}
+
+.comment-input-wrapper button {
+  background: #185a9d;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 15px;
+}
+
+.comments-list {
+  margin-top: 15px;
+}
+
+.comment-item {
+  background: #f4f4f4;
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  border-left: 3px solid #185a9d;
+}
+
+.comment-user {
+  color: #185a9d;
+  font-weight: 600;
+}
+.comment-text {
+  color: #333;
+  margin-top: 5px;
+}
+.comment-date {
+  color: #999;
+  font-size: 12px;
+}

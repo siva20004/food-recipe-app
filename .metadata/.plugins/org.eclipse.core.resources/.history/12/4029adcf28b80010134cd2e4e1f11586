@@ -1,0 +1,38 @@
+package com.recipeapp.entity;
+
+import jakarta.persistence.*;
+import java.util.Date;
+
+@Entity
+@Table(name = "comments")
+public class Comment {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private Long recipeId;
+    private String user;
+
+    @Column(length = 1000)
+    private String text;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date date;
+
+    // Getters and Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public Long getRecipeId() { return recipeId; }
+    public void setRecipeId(Long recipeId) { this.recipeId = recipeId; }
+
+    public String getUser() { return user; }
+    public void setUser(String user) { this.user = user; }
+
+    public String getText() { return text; }
+    public void setText(String text) { this.text = text; }
+
+    public Date getDate() { return date; }
+    public void setDate(Date date) { this.date = date; }
+}

@@ -1,0 +1,49 @@
+package com.recipeapp.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+import com.recipeapp.dto.ApiResponse;
+import com.recipeapp.entity.Recipe;
+import com.recipeapp.service.ChefService;
+import com.recipeapp.service.RecipeService;
+import java.util.List;
+
+@CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
+@RestController
+@RequestMapping("/api/recipes")
+public class RecipeController {
+
+    @Autowired
+    private RecipeService recipeService;
+
+    @Autowired
+    private ChefService chefService;
+
+    // ✅ Get all recipes
+    @GetMapping
+    public List<Recipe> getAllRecipes() {
+        return recipeService.getAllRecipes();
+    }
+
+    // ✅ Add new recipe (only by approved chef)
+    @PostMapping("/add/{chefId}")
+    public ApiResponse<Recipe> addRecipe(@PathVariable Long chefId, @RequestBody Recipe recipe) {
+        try {
+            Recipe saved = chefService.addRecipe(recipe, chefId);
+            return new ApiResponse<>(true, "Recipe added successfully!", saved);
+        } catch (Exception e) {
+            return new ApiResponse<>(false, "Failed to add recipe: " + e.getMessage(), null);
+        }
+    }
+
+    // ✅ Get recipes by chef
+    @GetMapping("/chef/{chefId}")
+    public ApiResponse<List<Recipe>> getChefRecipes(@PathVariable Long chefId) {
+        try {
+            List<Recipe> recipes = chefService.getRecipesByChef(chefId);
+            return new ApiResponse<>(true, "Fetched recipes successfully!", recipes);
+        } catch (Exception e) {
+            return new ApiResponse<>(false, "Error fetching recipes: " + e.getMessage(), null);
+        }
+    }
+}

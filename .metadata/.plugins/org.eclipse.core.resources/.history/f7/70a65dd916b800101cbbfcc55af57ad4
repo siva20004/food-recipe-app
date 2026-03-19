@@ -1,0 +1,75 @@
+package com.recipeapp.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
+
+import com.recipeapp.dto.ApiResponse;
+import com.recipeapp.entity.*;
+import com.recipeapp.repository.CommentRepository;
+import com.recipeapp.service.RecipeService;
+import com.recipeapp.repository.RecipeRepository;
+
+@CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
+@RestController
+@RequestMapping("/api/recipes")
+public class RecipeController {
+
+    @Autowired
+    private RecipeService recipeService;
+
+    @Autowired
+    private RecipeRepository recipeRepo;
+
+    @Autowired
+    private CommentRepository commentRepo;
+
+    // ✅ Get all recipes
+    @GetMapping
+    public List<Recipe> getAll() {
+        return recipeService.getAllRecipes();
+    }
+
+    // ✅ Get recipe by ID
+    @GetMapping("/{id}")
+    public Recipe getById(@PathVariable Long id) {
+        return recipeService.getRecipeById(id);
+    }
+
+    // ✅ Get recipes by type
+    @GetMapping("/type/{type}")
+    public List<Recipe> getByType(@PathVariable String type) {
+        return recipeService.getRecipesByType(type);
+    }
+
+    // ✅ Add comment
+    @PostMapping("/{id}/comments")
+    public ApiResponse<Comment> addComment(@PathVariable Long id, @RequestBody Comment commentReq) {
+        Recipe recipe = recipeRepo.findById(id).orElse(null);
+        if (recipe == null) {
+            return new ApiResponse<>(false, "Recipe not found!", null);
+        }
+
+        Comment comment = new Comment();
+        comment.setRecipeId(id);
+        comment.setUser(commentReq.getUser());
+        comment.setText(commentReq.getText());
+        comment.setDate(new java.util.Date());
+        commentRepo.save(comment);
+
+        return new ApiResponse<>(true, "Comment added successfully!", comment);
+    }
+    
+ // ✅ Keep recipe logic only — remove comment duplication
+    @PostMapping("/{id}/download")
+    public ApiResponse<Recipe> incrementDownload(@PathVariable Long id) {
+        Recipe recipe = recipeRepo.findById(id).orElse(null);
+        if (recipe == null) {
+            return new ApiResponse<>(false, "Recipe not found!", null);
+        }
+        recipe.setDownloads(recipe.getDownloads() + 1);
+        recipeRepo.save(recipe);
+        return new ApiResponse<>(true, "Download count updated!", recipe);
+    }
+
+}

@@ -1,0 +1,13 @@
+package com.recipeapp.repository;
+
+import com.recipeapp.entity.Comment;
+import org.springframework.data.jpa.repository.JpaRepository;
+import java.util.List;
+
+public interface CommentRepository extends JpaRepository<Comment, Long> {
+    // Fetch all comments belonging to a specific recipe
+    List<Comment> findByRecipeId(Long recipeId);
+
+    // Optional: Delete all comments when a recipe is deleted
+    void deleteByRecipeId(Long recipeId);
+}

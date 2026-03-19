@@ -1,0 +1,211 @@
+package com.recipeapp.service;
+
+import com.recipeapp.dto.LoginRequest;
+import com.recipeapp.dto.SignupRequest;
+import com.recipeapp.dto.LoginResponse;
+import com.recipeapp.entity.Admin;
+import com.recipeapp.entity.Chef;
+import com.recipeapp.entity.User;
+import com.recipeapp.repository.AdminRepository;
+import com.recipeapp.repository.ChefRepository;
+import com.recipeapp.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.Optional;
+
+@Service
+public class AuthService {
+
+    @Autowired
+    private UserRepository userRepo;
+
+    @Autowired
+    private ChefRepository chefRepo;
+
+    @Autowired
+    private AdminRepository adminRepo;
+
+    // ===========================
+    // 🔹 REGISTER USER
+    // ===========================
+    public Object registerUser(SignupRequest req) {
+        if (req.getRole() == null || req.getRole().isEmpty()) {
+            throw new IllegalArgumentException("Role is required!");
+        }
+
+        // 🧑 Register User
+        if (req.getRole().equalsIgnoreCase("user")) {
+            if (userRepo.findByUsername(req.getUsername()).isPresent()) {
+                throw new IllegalArgumentException("Username already exists!");
+            }
+            User user = new User();
+            user.setFullName(req.getFullName());
+            user.setUsername(req.getUsername());
+            user.setPassword(req.getPassword());
+            user.setEmail(req.getEmail());
+            user.setPhone(req.getPhone());
+            user.setRole("user");
+            userRepo.save(user);
+            return user;
+        }
+
+        // 👨‍🍳 Register Chef
+        if (req.getRole().equalsIgnoreCase("chef")) {
+            if (chefRepo.findByUsername(req.getUsername()).isPresent()) {
+                throw new IllegalArgumentException("Username already exists!");
+            }
+            Chef chef = new Chef();
+            chef.setFullName(req.getFullName());
+            chef.setUsername(req.getUsername());
+            chef.setPassword(req.getPassword());
+            chef.setEmail(req.getEmail());
+            chef.setPhone(req.getPhone());
+            chef.setExperience(req.getExperience());
+            chef.setRole("chef");
+            chef.setApproved(false);
+            chef.setRejected(false);
+            chef.setStatus("PENDING");
+            chefRepo.save(chef);
+            return chef;
+        }
+
+        throw new IllegalArgumentException("Invalid role specified!");
+    }
+
+    // ===========================
+    // 🔹 LOGIN
+    // ===========================
+    public Object loginUser(LoginRequest req) {
+        Optional<Admin> admin = adminRepo.findByUsername(req.getUsername());
+        if (admin.isPresent() && admin.get().getPassword().equals(req.getPassword())) {
+            return new LoginResponse(admin.get(), "admin");
+        }
+
+        Optional<Chef> chef = chefRepo.findByUsername(req.getUsername());
+        if (chef.isPresent() && chef.get().getPassword().equals(req.getPassword())) {
+            if (!chef.get().isApproved() || "PENDING".equalsIgnoreCase(chef.get().getStatus())) {
+                throw new IllegalArgumentException("Chef account is pending admin approval!");
+            }
+            if ("REJECTED".equalsIgnoreCase(chef.get().getStatus())) {
+                throw new IllegalArgumentException("Your chef account has been rejected.");
+            }
+            return new LoginResponse(chef.get(), "chef");
+        }
+
+        Optional<User> user = userRepo.findByUsername(req.getUsername());
+        if (user.isPresent() && user.get().getPassword().equals(req.getPassword())) {
+            return new LoginResponse(user.get(), "user");
+        }
+
+        throw new IllegalArgumentException("Invalid credentials!");
+    }
+
+    // ===========================
+    // 🔹 CHANGE PASSWORD
+    // ===========================
+    public boolean changePassword(LoginRequest req) {
+        String username = req.getUsername();
+        String oldPass = req.getOldPassword();
+        String newPass = req.getNewPassword();
+
+        Optional<Admin> adminOpt = adminRepo.findByUsername(username);
+        if (adminOpt.isPresent()) {
+            Admin admin = adminOpt.get();
+            if (!admin.getPassword().equals(oldPass))
+                throw new IllegalArgumentException("Incorrect old password!");
+            admin.setPassword(newPass);
+            adminRepo.save(admin);
+            return true;
+        }
+
+        Optional<Chef> chefOpt = chefRepo.findByUsername(username);
+        if (chefOpt.isPresent()) {
+            Chef chef = chefOpt.get();
+            if (!chef.getPassword().equals(oldPass))
+                throw new IllegalArgumentException("Incorrect old password!");
+            chef.setPassword(newPass);
+            chefRepo.save(chef);
+            return true;
+        }
+
+        Optional<User> userOpt = userRepo.findByUsername(username);
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            if (!user.getPassword().equals(oldPass))
+                throw new IllegalArgumentException("Incorrect old password!");
+            user.setPassword(newPass);
+            userRepo.save(user);
+            return true;
+        }
+
+        throw new IllegalArgumentException("User not found!");
+    }
+
+    // ===========================
+    // 🔹 UPDATE PROFILE (Admin/User/Chef)
+    // ===========================
+    public Object updateProfile(String username, SignupRequest req) {
+        // 🧑 Update User
+        Optional<User> userOpt = userRepo.findByUsername(username);
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            user.setFullName(req.getFullName());
+            user.setEmail(req.getEmail());
+            user.setPhone(req.getPhone());
+            if (req.getPassword() != null && !req.getPassword().isEmpty()) {
+                user.setPassword(req.getPassword());
+            }
+            userRepo.save(user);
+            return user;
+        }
+
+        // 👨‍🍳 Update Chef
+        Optional<Chef> chefOpt = chefRepo.findByUsername(username);
+        if (chefOpt.isPresent()) {
+            Chef chef = chefOpt.get();
+            chef.setFullName(req.getFullName());
+            chef.setEmail(req.getEmail());
+            chef.setPhone(req.getPhone());
+            chef.setExperience(req.getExperience());
+            chef.setProfilePic(req.getProfilePic());
+            if (req.getPassword() != null && !req.getPassword().isEmpty()) {
+                chef.setPassword(req.getPassword());
+            }
+            chefRepo.save(chef);
+            return chef;
+        }
+
+        // 🧠 Update Admin
+        Optional<Admin> adminOpt = adminRepo.findByUsername(username);
+        if (adminOpt.isPresent()) {
+            Admin admin = adminOpt.get();
+            admin.setFullName(req.getFullName());
+            admin.setEmail(req.getEmail());
+            admin.setPhone(req.getPhone());
+            if (req.getPassword() != null && !req.getPassword().isEmpty()) {
+                admin.setPassword(req.getPassword());
+            }
+            adminRepo.save(admin);
+            return admin;
+        }
+
+        throw new IllegalArgumentException("User not found!");
+    }
+
+    // ===========================
+    // 🔹 APPROVE CHEF
+    // ===========================
+    public boolean approveChef(Long id) {
+        Optional<Chef> chefOpt = chefRepo.findById(id);
+        if (chefOpt.isPresent()) {
+            Chef chef = chefOpt.get();
+            chef.setApproved(true);
+            chef.setRejected(false);
+            chef.setStatus("APPROVED");
+            chefRepo.save(chef);
+            return true;
+        }
+        return false;
+    }
+}

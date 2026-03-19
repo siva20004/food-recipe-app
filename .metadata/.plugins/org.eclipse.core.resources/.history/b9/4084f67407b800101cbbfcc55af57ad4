@@ -1,0 +1,100 @@
+package com.recipeapp.service;
+
+import com.recipeapp.entity.Admin;
+import com.recipeapp.entity.Chef;
+import com.recipeapp.entity.User;
+import com.recipeapp.repository.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
+@Service
+public class AuthService {
+
+    @Autowired
+    private AdminRepository adminRepo;
+    @Autowired
+    private ChefRepository chefRepo;
+    @Autowired
+    private UserRepository userRepo;
+
+    // ============================================================
+    // 🧾 SIGNUP
+    // ============================================================
+    public Map<String, Object> signup(Object newUser, String role) {
+        Map<String, Object> response = new HashMap<>();
+
+        switch (role.toLowerCase()) {
+            case "admin" -> {
+                Admin admin = (Admin) newUser;
+                adminRepo.save(admin);
+                response.put("message", "Admin signup successful!");
+                response.put("user", admin);
+            }
+            case "chef" -> {
+                Chef chef = (Chef) newUser;
+                chef.setApproved(false); // must be approved by admin
+                chefRepo.save(chef);
+                response.put("message", "Chef signup successful! Pending admin approval.");
+                response.put("user", chef);
+            }
+            case "user" -> {
+                User user = (User) newUser;
+                userRepo.save(user);
+                response.put("message", "User signup successful!");
+                response.put("user", user);
+            }
+            default -> response.put("message", "Invalid role!");
+        }
+
+        return response;
+    }
+
+    // ============================================================
+    // 🔐 LOGIN
+    // ============================================================
+    public Map<String, Object> login(String username, String password) {
+        Map<String, Object> response = new HashMap<>();
+
+        // --- Admin login ---
+        Optional<Admin> adminOpt = adminRepo.findByUsername(username);
+        if (adminOpt.isPresent() && adminOpt.get().getPassword().equals(password)) {
+            response.put("message", "Admin login successful!");
+            response.put("role", "admin");
+            response.put("user", adminOpt.get());
+            return response;
+        }
+
+        // --- Chef login ---
+        Optional<Chef> chefOpt = chefRepo.findByUsername(username);
+        if (chefOpt.isPresent()) {
+            Chef chef = chefOpt.get();
+            if (!chef.getPassword().equals(password)) {
+                response.put("message", "Incorrect password!");
+                return response;
+            }
+            if (!chef.isApproved()) {
+                response.put("message", "Your chef account is pending admin approval.");
+                return response;
+            }
+            response.put("message", "Chef login successful!");
+            response.put("role", "chef");
+            response.put("user", chef);
+            return response;
+        }
+
+        // --- User login ---
+        Optional<User> userOpt = userRepo.findByUsername(username);
+        if (userOpt.isPresent() && userOpt.get().getPassword().equals(password)) {
+            response.put("message", "User login successful!");
+            response.put("role", "user");
+            response.put("user", userOpt.get());
+            return response;
+        }
+
+        response.put("message", "Invalid username or password!");
+        return response;
+    }
+}

@@ -1,0 +1,20 @@
+@Entity
+@Table(name = "recipes")
+public class Recipe {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private Long chefId;
+    private String name;
+    private String type;
+    private String description;
+    private String steps;
+
+    // 🧩 Add this line — gives default 0 downloads
+    @Column(nullable = false, columnDefinition = "int default 0")
+    private int downloads = 0;
+
+    // getters & setters...
+}

@@ -1,0 +1,45 @@
+package com.recipeapp.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
+import com.recipeapp.dto.ApiResponse;
+import com.recipeapp.entity.*;
+import com.recipeapp.service.ChefService;
+
+@CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
+@RestController
+@RequestMapping("/api/chef")
+public class ChefController {
+
+    @Autowired
+    private ChefService chefService;
+
+    // ✅ Get all pending chefs (for admin)
+    @GetMapping("/pending")
+    public ApiResponse<List<Chef>> getPendingChefs() {
+        List<Chef> chefs = chefService.getPendingChefs();
+        return new ApiResponse<>(true, "Fetched pending chefs successfully", chefs);
+    }
+
+    // ✅ Approve a chef (admin action)
+    @PutMapping("/approve/{chefId}")
+    public ApiResponse<Chef> approveChef(@PathVariable Long chefId) {
+        Chef chef = chefService.approveChef(chefId);
+        return new ApiResponse<>(true, "Chef approved successfully!", chef);
+    }
+
+    // 🍳 Add new recipe
+    @PostMapping("/add-recipe/{chefId}")
+    public ApiResponse<Recipe> addRecipe(@PathVariable Long chefId, @RequestBody Recipe recipe) {
+        Recipe saved = chefService.addRecipe(recipe, chefId);
+        return new ApiResponse<>(true, "Recipe added successfully!", saved);
+    }
+
+    // 📜 Get recipes by chef
+    @GetMapping("/recipes/{chefId}")
+    public ApiResponse<List<Recipe>> getChefRecipes(@PathVariable Long chefId) {
+        List<Recipe> recipes = chefService.getRecipesByChef(chefId);
+        return new ApiResponse<>(true, "Fetched chef recipes successfully!", recipes);
+    }
+}

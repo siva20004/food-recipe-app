@@ -1,0 +1,47 @@
+package com.recipeapp.service;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import java.util.List;
+import com.recipeapp.entity.*;
+import com.recipeapp.repository.*;
+
+@Service
+public class ChefService {
+
+    @Autowired
+    private ChefRepository chefRepo;
+
+    @Autowired
+    private RecipeRepository recipeRepo;
+
+    // 🧾 List all chefs pending admin approval
+    public List<Chef> getPendingChefs() {
+        return chefRepo.findByApproved(false);
+    }
+
+    // ✅ Approve a specific chef
+    public Chef approveChef(Long id) {
+        Chef chef = chefRepo.findById(id).orElseThrow(() ->
+                new IllegalArgumentException("Chef not found with ID: " + id));
+        chef.setApproved(true);
+        return chefRepo.save(chef);
+    }
+
+    // 🍳 Add new recipe for a given chef (only if approved)
+    public Recipe addRecipe(Recipe recipe, Long chefId) {
+        Chef chef = chefRepo.findById(chefId).orElseThrow(() ->
+                new IllegalArgumentException("Chef not found!"));
+
+        if (!chef.isApproved())
+            throw new IllegalStateException("Chef not approved by admin!");
+
+        recipe.setChefId(chefId);
+        return recipeRepo.save(recipe);
+    }
+
+    // 📜 Get all recipes created by a chef
+    public List<Recipe> getRecipesByChef(Long chefId) {
+        return recipeRepo.findByChefId(chefId);
+    }
+}

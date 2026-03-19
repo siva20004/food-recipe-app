@@ -1,0 +1,26 @@
+package com.recipeapp.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
+import com.recipeapp.entity.*;
+import com.recipeapp.service.ChefService;
+
+@CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
+@RestController
+@RequestMapping("/api/chef")
+public class ChefController {
+
+    @Autowired
+    private ChefService chefService;
+
+    @PostMapping("/add-recipe/{chefId}")
+    public Recipe addRecipe(@PathVariable Long chefId, @RequestBody Recipe recipe) {
+        return chefService.addRecipe(recipe, chefId);
+    }
+
+    @GetMapping("/recipes/{chefId}")
+    public List<Recipe> getChefRecipes(@PathVariable Long chefId) {
+        return chefService.getRecipesByChef(chefId);
+    }
+}

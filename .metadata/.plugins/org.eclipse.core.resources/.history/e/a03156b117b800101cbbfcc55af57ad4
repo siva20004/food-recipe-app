@@ -1,0 +1,89 @@
+package com.recipeapp.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+import com.recipeapp.dto.*;
+import com.recipeapp.entity.*;
+import com.recipeapp.repository.ChefRepository;
+import com.recipeapp.service.AuthService;
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/auth")
+@CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
+public class AuthController {
+
+    @Autowired
+    private AuthService authService;
+
+    @Autowired
+    private ChefRepository chefRepo;
+
+    // 🧾 SIGNUP
+    @PostMapping("/signup")
+    public ApiResponse<Object> signup(@RequestBody SignupRequest req) {
+        try {
+            Object user = authService.registerUser(req);
+            return new ApiResponse<>(true, "Signup successful!", user);
+        } catch (IllegalArgumentException e) {
+            return new ApiResponse<>(false, e.getMessage(), null);
+        } catch (Exception e) {
+            return new ApiResponse<>(false, "Signup failed: " + e.getMessage(), null);
+        }
+    }
+
+    // 🔐 LOGIN
+    @PostMapping("/login")
+    public ApiResponse<Object> login(@RequestBody LoginRequest req) {
+        try {
+            Object loginResult = authService.loginUser(req);
+            return new ApiResponse<>(true, "Login successful!", loginResult);
+        } catch (IllegalArgumentException e) {
+            return new ApiResponse<>(false, e.getMessage(), null);
+        } catch (Exception e) {
+            return new ApiResponse<>(false, "Login failed: " + e.getMessage(), null);
+        }
+    }
+
+    // 🚪 LOGOUT
+    @PostMapping("/logout")
+    public ApiResponse<String> logout() {
+        return new ApiResponse<>(true, "Logout successful!", null);
+    }
+
+    // 👨‍🍳 Get All Chefs for Admin
+    @GetMapping("/chefs")
+    public ApiResponse<List<Chef>> getAllChefs() {
+        List<Chef> chefs = chefRepo.findAll();
+        return new ApiResponse<>(true, "Fetched all chefs successfully!", chefs);
+    }
+
+    // ✅ Approve Chef
+    @PutMapping("/approveChef/{id}")
+    public ApiResponse<String> approveChef(@PathVariable Long id) {
+        try {
+            boolean updated = authService.approveChef(id);
+            if (updated)
+                return new ApiResponse<>(true, "Chef approved successfully!", null);
+            else
+                return new ApiResponse<>(false, "Chef not found or already approved!", null);
+        } catch (Exception e) {
+            return new ApiResponse<>(false, "Error approving chef: " + e.getMessage(), null);
+        }
+    }
+    
+    // ✅ Reject chef
+    @PutMapping("/rejectChef/{id}")
+    public ApiResponse<Chef> rejectChef(@PathVariable Long id) {
+        Optional<Chef> chefOpt = chefRepo.findById(id);
+        if (chefOpt.isEmpty()) {
+            return new ApiResponse<>(false, "Chef not found!", null);
+        }
+
+        Chef chef = chefOpt.get();
+        chef.setApproved(false);
+        chefRepo.save(chef);
+
+        return new ApiResponse<>(true, "Chef rejected successfully!", chef);
+    }
+}

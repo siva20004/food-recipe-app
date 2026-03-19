@@ -1,0 +1,17 @@
+package com.recipeapp.repository;
+
+import com.recipeapp.entity.Chef;
+import org.springframework.data.jpa.repository.JpaRepository;
+import java.util.List;
+import java.util.Optional;
+
+public interface ChefRepository extends JpaRepository<Chef, Long> {
+
+    Optional<Chef> findByUsername(String username);
+
+    // 🔹 Old boolean-based check (still valid for backward compatibility)
+    List<Chef> findByApproved(boolean approved);
+
+    // 🔹 New method: filter chefs by status ("PENDING", "APPROVED", "REJECTED")
+    List<Chef> findByStatus(String status);
+}

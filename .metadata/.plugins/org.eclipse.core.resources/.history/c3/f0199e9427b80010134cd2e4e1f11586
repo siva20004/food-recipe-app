@@ -1,0 +1,85 @@
+package com.recipeapp.controller;
+
+import com.recipeapp.dto.ApiResponse;
+import com.recipeapp.entity.Chef;
+import com.recipeapp.repository.ChefRepository;
+import com.recipeapp.service.EmailService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
+
+@CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
+@RestController
+@RequestMapping("/api/auth")
+public class AuthController {
+
+    @Autowired
+    private ChefRepository chefRepo;
+
+    @Autowired
+    private EmailService emailService;
+
+    // ✅ Get all chefs
+    @GetMapping("/chefs")
+    public ApiResponse<List<Chef>> getAllChefs() {
+        List<Chef> chefs = chefRepo.findAll();
+        return new ApiResponse<>(true, "All chefs fetched successfully", chefs);
+    }
+
+    // ✅ Approve Chef + Send Email
+    @PutMapping("/approveChef/{id}")
+    public ApiResponse<Object> approveChef(@PathVariable Long id) {
+        Chef chef = chefRepo.findById(id).orElse(null);
+        if (chef == null) {
+            return new ApiResponse<>(false, "Chef not found!");
+        }
+
+        if (chef.isApproved()) {
+            return new ApiResponse<>(false, "Chef already approved!");
+        }
+
+        chef.setApproved(true);
+        chefRepo.save(chef);
+
+        // 📨 Send approval email
+        String subject = "Chef Account Approved – RecipeApp 🍳";
+        String text = "Dear " + chef.getFullName() + ",\n\n"
+                + "Congratulations! 🎉 Your chef account on RecipeApp has been approved by the admin.\n"
+                + "You can now log in and start uploading your recipes.\n\n"
+                + "Login here: http://localhost:5173/login\n\n"
+                + "Best wishes,\nRecipeApp Team";
+
+        emailService.sendMail(chef.getEmail(), subject, text);
+
+        return new ApiResponse<>(true, "Chef approved and email sent!", chef);
+    }
+
+ // ✅ Reject Chef + Send Email (keeps record)
+    @PutMapping("/rejectChef/{id}")
+    public ApiResponse<Object> rejectChef(@PathVariable Long id) {
+        Chef chef = chefRepo.findById(id).orElse(null);
+        if (chef == null) {
+            return new ApiResponse<>(false, "Chef not found!");
+        }
+
+        if (chef.isApproved()) {
+            return new ApiResponse<>(false, "Cannot reject an approved chef!");
+        }
+
+        chef.setRejected(true);
+        chefRepo.save(chef);
+
+        String subject = "Chef Account Rejected – RecipeApp";
+        String text = "Dear " + chef.getFullName() + ",\n\n"
+                + "We regret to inform you that your chef registration has not been approved at this time.\n"
+                + "You may contact support or apply again later.\n\n"
+                + "Regards,\nRecipeApp Team";
+
+        emailService.sendMail(chef.getEmail(), subject, text);
+
+        return new ApiResponse<>(true, "Chef rejected successfully and email sent!", chef);
+    }
+
+    
+    
+}

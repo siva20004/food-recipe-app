@@ -1,0 +1,50 @@
+package com.recipeapp.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import com.recipeapp.entity.*;
+import com.recipeapp.service.AuthService;
+import com.recipeapp.dto.LoginRequest;
+import com.recipeapp.dto.SignupRequest;
+import com.recipeapp.dto.ApiResponse;
+
+@RestController
+@RequestMapping("/api/auth")
+@CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
+public class AuthController {
+
+    @Autowired
+    private AuthService authService;
+
+    // ✅ Signup
+    @PostMapping("/signup")
+    public ResponseEntity<ApiResponse<?>> signup(@RequestBody SignupRequest request) {
+        try {
+            Object user = authService.registerUser(request);
+            return ResponseEntity.ok(new ApiResponse<>(true, "Signup successful", user));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ApiResponse<>(false, e.getMessage(), null));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>(false, "Signup failed: " + e.getMessage(), null));
+        }
+    }
+
+    // ✅ Login
+    @PostMapping("/login")
+    public ResponseEntity<ApiResponse<?>> login(@RequestBody LoginRequest request) {
+        try {
+            Object user = authService.loginUser(request);
+            return ResponseEntity.ok(new ApiResponse<>(true, "Login successful", user));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new ApiResponse<>(false, e.getMessage(), null));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>(false, "Login failed: " + e.getMessage(), null));
+        }
+    }
+}

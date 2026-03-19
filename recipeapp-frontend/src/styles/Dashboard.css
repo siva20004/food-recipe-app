@@ -1,0 +1,226 @@
+/* ================================
+   Home Page (Landing)
+================================ */
+.home-container {
+  padding: 50px 40px;
+  text-align: center;
+  font-family: "Poppins", sans-serif;
+}
+
+.home-hero {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 60px;
+  margin-bottom: 60px;
+}
+
+.hero-text {
+  max-width: 500px;
+  text-align: left;
+}
+
+.hero-text h1 {
+  font-size: 2.8rem;
+  color: #185a9d;
+  margin-bottom: 15px;
+}
+
+.hero-text p {
+  font-size: 1.2rem;
+  color: #444;
+  margin-bottom: 25px;
+}
+
+.home-buttons button {
+  padding: 12px 28px;
+  border-radius: 8px;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  background: linear-gradient(135deg, #0c3528, #06192d);
+  color: white;
+  transition: all 0.3s ease;
+  margin-right: 15px;
+}
+
+.home-buttons .login-btn {
+  background: rgb(128, 40, 40);
+  color: #185a9d;
+  border: 2px solid #185a9d;
+}
+
+.home-buttons button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.hero-image img {
+  width: 420px;
+  border-radius: 20px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* Features section */
+.home-features {
+  margin-top: 40px;
+}
+
+.home-features h2 {
+  font-size: 2rem;
+  color: #185a9d;
+  margin-bottom: 30px;
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 25px;
+  justify-items: center;
+}
+
+.feature-card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(190, 39, 39, 0.1);
+  padding: 25px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.feature-card img {
+  width: 60px;
+  height: 60px;
+  margin-bottom: 15px;
+}
+
+.feature-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+}
+
+/* ================================
+   Auth Containers (Login + Signup)
+================================ */
+.auth-container,
+.login-container,
+.signup-container {
+  max-width: 400px;
+  margin: 100px auto;
+  background: #fff;
+  padding: 35px 30px;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  text-align: center;
+  animation: fadeIn 0.6s ease-in-out;
+  transition: all 0.3s ease;
+}
+
+/* Headings */
+.auth-container h2,
+.login-container h2,
+.signup-container h2 {
+  color: #185a9d;
+  font-size: 1.8rem;
+  margin-bottom: 20px;
+  font-weight: 600;
+}
+
+/* Unified Inputs + Selects */
+.auth-container input,
+.login-container input,
+.signup-container input,
+.signup-container select {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  margin-bottom: 15px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+  font-family: "Poppins", sans-serif;
+  background: #fafafa;
+  outline: none;
+  transition: border 0.2s ease, box-shadow 0.2s ease, background 0.3s ease;
+}
+
+.signup-container select {
+  height: 48px;
+  background-color: #fff;
+}
+
+/* Focused input glow */
+.auth-container input:focus,
+.signup-container select:focus {
+  border-color: #43cea2;
+  box-shadow: 0 0 0 2px rgba(67, 206, 162, 0.25);
+  background: #fff;
+}
+
+/* Buttons */
+.auth-container button,
+.login-container button,
+.signup-container button {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, #43cea2, #185a9d);
+  color: #fff;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.auth-container button:hover,
+.login-container button:hover,
+.signup-container button:hover {
+  background: linear-gradient(135deg, #333635, #949ea8);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(24, 90, 157, 0.3);
+}
+
+/* Paragraph links */
+.auth-container p,
+.login-container p,
+.signup-container p {
+  margin-top: 15px;
+  color: #333;
+  font-size: 0.95rem;
+}
+
+.auth-container a,
+.signup-container a,
+.login-container a {
+  color: #185a9d;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.auth-container a:hover {
+  color: #43cea2;
+}
+
+/* Fade animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .auth-container,
+  .login-container,
+  .signup-container {
+    margin: 60px auto;
+    padding: 25px;
+  }
+}

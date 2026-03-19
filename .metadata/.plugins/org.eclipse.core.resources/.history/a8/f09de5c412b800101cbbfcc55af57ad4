@@ -1,0 +1,26 @@
+package com.recipeapp.service;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import java.util.List;
+import com.recipeapp.entity.*;
+import com.recipeapp.repository.*;
+
+@Service
+public class RecipeService {
+
+    @Autowired
+    private RecipeRepository recipeRepo;
+
+    public List<Recipe> getAllRecipes() {
+        return recipeRepo.findAll();
+    }
+
+    public List<Recipe> getRecipesByType(String type) {
+        return recipeRepo.findByType(type);
+    }
+
+    public Recipe getRecipeById(Long id) {
+        return recipeRepo.findById(id).orElse(null);
+    }
+}

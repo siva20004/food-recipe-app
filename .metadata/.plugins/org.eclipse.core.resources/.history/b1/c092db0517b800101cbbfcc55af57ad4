@@ -1,0 +1,50 @@
+package com.recipeapp.entity;
+
+import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import java.time.OffsetDateTime;
+import java.util.Date;
+
+@Entity
+@Table(name = "comments")
+public class Comment {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private Long recipeId;
+
+    private String username; // 👈 the username of the commenter
+
+    @Column(length = 1000, nullable = false)
+    private String text;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXXX")
+    private OffsetDateTime createdAt;
+
+    public Comment() {
+        this.createdAt = OffsetDateTime.now();
+    }
+
+    // ✅ Getters & Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public Long getRecipeId() { return recipeId; }
+    public void setRecipeId(Long recipeId) { this.recipeId = recipeId; }
+
+    public String getUsername() { return username; }
+    public void setUsername(String username) { this.username = username; }
+
+    public String getText() { return text; }
+    public void setText(String text) { this.text = text; }
+
+    public OffsetDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(OffsetDateTime createdAt) { this.createdAt = createdAt; }
+
+	public void setDate(Date date) {
+		// TODO Auto-generated method stub
+		
+	}
+}

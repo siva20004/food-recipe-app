@@ -1,0 +1,140 @@
+package com.recipeapp.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.List;
+import java.util.Optional;
+
+import com.recipeapp.dto.ApiResponse;
+import com.recipeapp.entity.*;
+import com.recipeapp.repository.*;
+import com.recipeapp.service.RecipeService;
+
+@CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
+@RestController
+@RequestMapping("/api/recipes")
+public class RecipeController {
+
+    @Autowired
+    private RecipeService recipeService;
+
+    @Autowired
+    private RecipeRepository recipeRepo;
+
+    @Autowired
+    private ChefRepository chefRepo;
+
+    @Autowired
+    private CommentRepository commentRepo;
+
+    // ✅ Get all recipes
+    @GetMapping
+    public List<Recipe> getAllRecipes() {
+        return recipeService.getAllRecipes();
+    }
+
+    // ✅ Get recipes by type
+    @GetMapping("/type/{type}")
+    public List<Recipe> getRecipesByType(@PathVariable String type) {
+        return recipeService.getRecipesByType(type);
+    }
+
+    // ✅ Get recipe by ID
+    @GetMapping("/{id}")
+    public ApiResponse<Recipe> getRecipeById(@PathVariable Long id) {
+        Recipe recipe = recipeService.getRecipeById(id);
+        if (recipe == null)
+            return new ApiResponse<>(false, "Recipe not found!", null);
+        return new ApiResponse<>(true, "Recipe found!", recipe);
+    }
+
+    // ✅ Add a new recipe (chef only)
+    @PostMapping("/add")
+    public ApiResponse<Object> addRecipe(@RequestBody Recipe recipe) {
+        try {
+            if (recipe.getChef() == null || recipe.getChef().getUsername() == null) {
+                return new ApiResponse<>(false, "Chef username is required!", null);
+            }
+
+            Optional<Chef> chefOpt = chefRepo.findByUsername(recipe.getChef().getUsername());
+            if (chefOpt.isEmpty()) {
+                return new ApiResponse<>(false, "Chef not found!", null);
+            }
+
+            Chef chef = chefOpt.get();
+
+            // 🚫 Ensure chef is approved
+            if (!chef.isApproved()) {
+                return new ApiResponse<>(false, "Your account is not approved yet by admin.", null);
+            }
+
+            // ✅ Attach chef and set timestamp
+            recipe.setChef(chef);
+            recipe.setCreatedAt(OffsetDateTime.now(ZoneOffset.UTC));
+
+            Recipe savedRecipe = recipeRepo.save(recipe);
+            return new ApiResponse<>(true, "Recipe added successfully!", savedRecipe);
+        } catch (Exception e) {
+            return new ApiResponse<>(false, "Failed to add recipe: " + e.getMessage(), null);
+        }
+    }
+
+    // ✅ Update existing recipe
+    @PutMapping("/{id}")
+    public ApiResponse<Object> updateRecipe(@PathVariable Long id, @RequestBody Recipe updatedRecipe) {
+        Recipe existing = recipeService.getRecipeById(id);
+        if (existing == null) {
+            return new ApiResponse<>(false, "Recipe not found!", null);
+        }
+
+        existing.setName(updatedRecipe.getName());
+        existing.setType(updatedRecipe.getType());
+        existing.setDescription(updatedRecipe.getDescription());
+        existing.setSteps(updatedRecipe.getSteps());
+
+        Recipe saved = recipeRepo.save(existing);
+        return new ApiResponse<>(true, "Recipe updated successfully!", saved);
+    }
+
+    // ✅ Delete a recipe
+    @DeleteMapping("/{id}")
+    public ApiResponse<String> deleteRecipe(@PathVariable Long id) {
+        boolean deleted = recipeService.deleteRecipe(id);
+        if (deleted)
+            return new ApiResponse<>(true, "Recipe deleted successfully!", null);
+        return new ApiResponse<>(false, "Recipe not found!", null);
+    }
+
+    // ✅ Add comment
+    @PostMapping("/{id}/comments")
+    public ApiResponse<Comment> addComment(@PathVariable Long id, @RequestBody Comment commentReq) {
+        Recipe recipe = recipeRepo.findById(id).orElse(null);
+        if (recipe == null) {
+            return new ApiResponse<>(false, "Recipe not found!", null);
+        }
+
+        Comment comment = new Comment();
+        comment.setRecipeId(id);
+        comment.setUsername(commentReq.getUsername() != null ? commentReq.getUsername() : "Anonymous");
+        comment.setText(commentReq.getText());
+        comment.setCreatedAt(OffsetDateTime.now(ZoneOffset.UTC));
+
+        Comment savedComment = commentRepo.save(comment);
+        return new ApiResponse<>(true, "Comment added successfully!", savedComment);
+    }
+
+    // ✅ Increment download count
+    @PostMapping("/{id}/download")
+    public ApiResponse<Recipe> incrementDownload(@PathVariable Long id) {
+        Recipe recipe = recipeRepo.findById(id).orElse(null);
+        if (recipe == null) {
+            return new ApiResponse<>(false, "Recipe not found!", null);
+        }
+
+        recipe.setDownloads(recipe.getDownloads() + 1);
+        recipeRepo.save(recipe);
+        return new ApiResponse<>(true, "Download count updated!", recipe);
+    }
+}

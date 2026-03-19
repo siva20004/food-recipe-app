@@ -1,0 +1,124 @@
+package com.recipeapp.service;
+
+import com.recipeapp.dto.LoginRequest;
+import com.recipeapp.dto.SignupRequest;
+import com.recipeapp.entity.*;
+import com.recipeapp.repository.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
+@Service
+public class AuthService {
+
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private ChefRepository chefRepository;
+    @Autowired
+    private AdminRepository adminRepository;
+
+    // 🧾 SIGNUP
+    public Object registerUser(SignupRequest request) {
+        if (request.getUsername() == null || request.getPassword() == null) {
+            throw new IllegalArgumentException("Username and password are required.");
+        }
+
+        if (userRepository.findByUsername(request.getUsername()).isPresent()
+                || chefRepository.findByUsername(request.getUsername()).isPresent()
+                || adminRepository.findByUsername(request.getUsername()).isPresent()) {
+            throw new IllegalArgumentException("Username already exists.");
+        }
+
+        switch (request.getRole().toLowerCase()) {
+            case "user" -> {
+                User user = new User();
+                user.setFullName(request.getFullName());
+                user.setUsername(request.getUsername());
+                user.setPassword(request.getPassword());
+                user.setEmail(request.getEmail());
+                user.setPhone(request.getPhone());
+                user.setRole("user");
+                return userRepository.save(user);
+            }
+            case "chef" -> {
+                Chef chef = new Chef();
+                chef.setFullName(request.getFullName());
+                chef.setUsername(request.getUsername());
+                chef.setPassword(request.getPassword());
+                chef.setEmail(request.getEmail());
+                chef.setPhone(request.getPhone());
+                chef.setExperience(request.getExperience());
+                chef.setRole("chef");
+                chef.setApproved(false);
+                return chefRepository.save(chef);
+            }
+            case "admin" -> {
+                Admin admin = new Admin();
+                admin.setFullName(request.getFullName());
+                admin.setUsername(request.getUsername());
+                admin.setPassword(request.getPassword());
+                admin.setEmail(request.getEmail());
+                admin.setPhone(request.getPhone());
+                admin.setRole("admin");
+                return adminRepository.save(admin);
+            }
+            default -> throw new IllegalArgumentException("Invalid role: " + request.getRole());
+        }
+    }
+
+    // 🔐 LOGIN
+    public Map<String, Object> loginUser(LoginRequest request) {
+        String username = request.getUsername();
+        String password = request.getPassword();
+
+        Map<String, Object> response = new HashMap<>();
+
+        // Admin login
+        Optional<Admin> adminOpt = adminRepository.findByUsername(username);
+        if (adminOpt.isPresent() && adminOpt.get().getPassword().equals(password)) {
+            response.put("user", adminOpt.get());
+            response.put("role", "admin");
+            return response;
+        }
+
+        // Chef login
+        Optional<Chef> chefOpt = chefRepository.findByUsername(username);
+        if (chefOpt.isPresent()) {
+            Chef chef = chefOpt.get();
+            if (!chef.getPassword().equals(password))
+                throw new IllegalArgumentException("Incorrect password!");
+            if (!chef.isApproved())
+                throw new IllegalArgumentException("Your chef account is pending admin approval.");
+            response.put("user", chef);
+            response.put("role", "chef");
+            return response;
+        }
+
+        // User login
+        Optional<User> userOpt = userRepository.findByUsername(username);
+        if (userOpt.isPresent() && userOpt.get().getPassword().equals(password)) {
+            response.put("user", userOpt.get());
+            response.put("role", "user");
+            return response;
+        }
+
+        throw new IllegalArgumentException("Invalid username or password!");
+    }
+
+    // 🧑‍🍳 APPROVE CHEF BY ADMIN
+    public boolean approveChef(Long id) {
+        Optional<Chef> chefOpt = chefRepository.findById(id);
+        if (chefOpt.isPresent()) {
+            Chef chef = chefOpt.get();
+            if (!chef.isApproved()) {
+                chef.setApproved(true);
+                chefRepository.save(chef);
+                return true;
+            }
+        }
+        return false;
+    }
+}

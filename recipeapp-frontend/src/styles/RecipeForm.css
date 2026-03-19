@@ -1,0 +1,86 @@
+.recipe-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-bottom: 20px;
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+}
+
+/* When editing, give a subtle highlight */
+.recipe-form.edit-mode {
+  border-left: 6px solid #185a9d;
+  background: #f8fbff;
+}
+
+.recipe-form input,
+.recipe-form select,
+.recipe-form textarea {
+  padding: 12px 15px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 14px;
+  font-family: Arial, sans-serif;
+  transition: border-color 0.3s;
+}
+
+.recipe-form input:focus,
+.recipe-form select:focus,
+.recipe-form textarea:focus {
+  outline: none;
+  border-color: #185a9d;
+}
+
+.recipe-form select {
+  cursor: pointer;
+  background-color: white;
+}
+
+.recipe-form textarea {
+  resize: vertical;
+  min-height: 80px;
+  line-height: 1.6;
+}
+
+.recipe-form textarea[rows="3"] {
+  min-height: 80px;
+}
+
+.recipe-form textarea[rows="6"] {
+  min-height: 150px;
+}
+
+/* Primary buttons */
+.recipe-form button {
+  background-color: #185a9d;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  transition: background-color 0.3s;
+}
+
+.recipe-form button:hover {
+  background-color: #0e437a;
+}
+
+/* Cancel button styling */
+.recipe-form .cancel-btn {
+  background-color: #ccc;
+  color: #333;
+}
+
+.recipe-form .cancel-btn:hover {
+  background-color: #bbb;
+}
+
+.recipe-form input::placeholder,
+.recipe-form textarea::placeholder {
+  color: #999;
+}

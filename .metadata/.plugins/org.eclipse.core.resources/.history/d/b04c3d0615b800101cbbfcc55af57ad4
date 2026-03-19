@@ -1,0 +1,26 @@
+package com.recipeapp.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
+import com.recipeapp.entity.*;
+import com.recipeapp.service.CommentService;
+
+@CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
+@RestController
+@RequestMapping("/api/comments")
+public class CommentController {
+
+    @Autowired
+    private CommentService commentService;
+
+    @PostMapping
+    public Comment addComment(@RequestBody Comment comment) {
+        return commentService.addComment(comment);
+    }
+
+    @GetMapping("/{recipeId}")
+    public List<Comment> getComments(@PathVariable Long recipeId) {
+        return commentService.getCommentsByRecipe(recipeId);
+    }
+}

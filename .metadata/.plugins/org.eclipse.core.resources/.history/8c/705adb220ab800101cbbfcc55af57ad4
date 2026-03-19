@@ -1,0 +1,84 @@
+package com.recipeapp.service;
+
+import com.recipeapp.dto.LoginRequest;
+import com.recipeapp.dto.SignupRequest;
+import com.recipeapp.entity.*;
+import com.recipeapp.repository.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Service
+public class AuthService {
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private ChefRepository chefRepository;
+
+    @Autowired
+    private AdminRepository adminRepository;
+
+    // ✅ Register User (no BCrypt)
+    public Object registerUser(SignupRequest request) {
+        if (request.getUsername() == null || request.getPassword() == null) {
+            throw new IllegalArgumentException("Username and password are required.");
+        }
+
+        if (userRepository.findByUsername(request.getUsername()).isPresent()
+                || chefRepository.findByUsername(request.getUsername()).isPresent()
+                || adminRepository.findByUsername(request.getUsername()).isPresent()) {
+            throw new IllegalArgumentException("Username already exists.");
+        }
+
+        switch (request.getRole().toLowerCase()) {
+            case "user":
+                User user = new User();
+                user.setFullName(request.getFullName());
+                user.setUsername(request.getUsername());
+                user.setPassword(request.getPassword());
+                user.setEmail(request.getEmail());
+                user.setPhone(request.getPhone());
+                return userRepository.save(user);
+
+            case "chef":
+                Chef chef = new Chef();
+                chef.setFullName(request.getFullName());
+                chef.setUsername(request.getUsername());
+                chef.setPassword(request.getPassword());
+                chef.setEmail(request.getEmail());
+                chef.setPhone(request.getPhone());
+                chef.setExperience(request.getExperience());
+                return chefRepository.save(chef);
+
+            case "admin":
+                Admin admin = new Admin();
+                admin.setFullName(request.getFullName());
+                admin.setUsername(request.getUsername());
+                admin.setPassword(request.getPassword());
+                admin.setEmail(request.getEmail());
+                admin.setPhone(request.getPhone());
+                return adminRepository.save(admin);
+
+            default:
+                throw new IllegalArgumentException("Invalid role: " + request.getRole());
+        }
+    }
+
+    // ✅ Login User (auto-detect role)
+    public Object loginUser(LoginRequest request) {
+        String username = request.getUsername();
+        String password = request.getPassword();
+
+        Admin admin = adminRepository.findByUsername(username).orElse(null);
+        if (admin != null && admin.getPassword().equals(password)) return admin;
+
+        Chef chef = chefRepository.findByUsername(username).orElse(null);
+        if (chef != null && chef.getPassword().equals(password)) return chef;
+
+        User user = userRepository.findByUsername(username).orElse(null);
+        if (user != null && user.getPassword().equals(password)) return user;
+
+        throw new IllegalArgumentException("Invalid username or password.");
+    }
+}

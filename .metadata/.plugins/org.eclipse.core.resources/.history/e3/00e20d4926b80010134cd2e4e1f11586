@@ -1,0 +1,14 @@
+package com.recipeapp.repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+import com.recipeapp.entity.Chef;
+import java.util.List;
+import java.util.Optional;
+
+@Repository
+public interface ChefRepository extends JpaRepository<Chef, Long> {
+    Optional<Chef> findByUsername(String username);
+    Optional<Chef> findByEmail(String email);
+    List<Chef> findByApproved(boolean approved);
+}

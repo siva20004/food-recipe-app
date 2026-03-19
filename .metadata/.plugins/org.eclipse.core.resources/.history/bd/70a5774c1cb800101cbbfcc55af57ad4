@@ -1,0 +1,15 @@
+package com.recipeapp.dto;
+
+import lombok.Data;
+
+@Data
+public class SignupRequest {
+    private String fullName;
+    private String username;
+    private String password;
+    private String email;
+    private String phone;
+    private String role;
+    private String experience;
+    private String profilePic; // ✅ Added for profile updates
+}
